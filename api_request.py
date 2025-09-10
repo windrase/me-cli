@@ -279,7 +279,7 @@ def get_family(api_key: str, tokens: dict, family_code: str, is_enterprise: bool
         print(json.dumps(res, indent=2))
         input("Press Enter to continue...")
         return None
-    
+    # print(json.dumps(res, indent=2))
     return res["data"]
 
 def get_families(api_key: str, tokens: dict, package_category_code: str) -> dict:
@@ -299,12 +299,18 @@ def get_families(api_key: str, tokens: dict, package_category_code: str) -> dict
     if res.get("status") != "SUCCESS":
         print(f"Failed to get families for category {package_category_code}")
         print(f"Res:{res}")
-        print(json.dumps(res, indent=2))
+        # print(json.dumps(res, indent=2))
         input("Press Enter to continue...")
         return None
     return res["data"]
 
-def get_package(api_key: str, tokens: dict, package_option_code: str) -> dict:
+def get_package(
+    api_key: str,
+    tokens: dict,
+    package_option_code: str,
+    package_family_code: str = "",
+    package_variant_code: str = ""
+    ) -> dict:
     path = "api/v8/xl-stores/options/detail"
     
     raw_payload = {
@@ -326,6 +332,7 @@ def get_package(api_key: str, tokens: dict, package_option_code: str) -> dict:
     res = send_api_request(api_key, path, raw_payload, tokens["id_token"], "POST")
     
     if "data" not in res:
+        print(json.dumps(res, indent=2))
         print("Error getting package:", res.get("error", "Unknown error"))
         return None
         
@@ -356,6 +363,7 @@ def send_payment_request(
     id_token: str,
     token_payment: str,
     ts_to_sign: int,
+    payment_for: str = "BUY_PACKAGE"
 ):
     path = "payments/api/v8/settlement-balance"
     package_code = payload_dict["items"][0]["item_code"]
@@ -381,7 +389,8 @@ def send_payment_request(
         ts_to_sign,
         package_code,
         token_payment,
-        "BALANCE"
+        "BALANCE",
+        payment_for
     )
     
     headers = {
@@ -408,7 +417,12 @@ def send_payment_request(
         print("[decrypt err]", e)
         return resp.text
 
-def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> dict:
+def purchase_package(
+    api_key: str,
+    tokens: dict,
+    package_option_code:str,
+    is_enterprise: bool = False
+    ) -> dict:
     package_details_data = get_package(api_key, tokens, package_option_code)
     if not package_details_data:
         print("Failed to get package details for purchase.")
@@ -420,6 +434,11 @@ def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> di
     variant_name = package_details_data["package_detail_variant"].get("name", "")
     option_name = package_details_data["package_option"].get("name", "")
     item_name = f"{variant_name} {option_name}".strip()
+    
+    activated_autobuy_code = package_details_data["package_option"]["activated_autobuy_code"]
+    autobuy_threshold_setting = package_details_data["package_option"]["autobuy_threshold_setting"]
+    can_trigger_rating = package_details_data["package_option"]["can_trigger_rating"]
+    payment_for = package_details_data["package_family"]["payment_for"]
     
     price = package_details_data["package_option"]["price"]
     amount_str = input(f"Total amount is {price}.\nEnter value if you need to overwrite, press enter to ignore & use default amount: ")
@@ -435,7 +454,7 @@ def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> di
     payment_path = "payments/api/v8/payment-methods-option"
     payment_payload = {
         "payment_type": "PURCHASE",
-        "is_enterprise": False,
+        "is_enterprise": is_enterprise,
         "payment_target": payment_target,
         "lang": "en",
         "is_referral": False,
@@ -453,13 +472,17 @@ def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> di
     token_payment = payment_res["data"]["token_payment"]
     ts_to_sign = payment_res["data"]["timestamp"]
     
+    # Overwrite, sometimes the payment_for from package details is empty
+    if payment_for == "":
+        payment_for = "BUY_PACKAGE"
+    
     # Settlement request
     settlement_payload = {
         "total_discount": 0,
-        "is_enterprise": False,
+        "is_enterprise": is_enterprise,
         "payment_token": "",
         "token_payment": token_payment,
-        "activated_autobuy_code": "",
+        "activated_autobuy_code": activated_autobuy_code,
         "cc_payment_type": "",
         "is_myxl_wallet": False,
         "pin": "",
@@ -477,23 +500,43 @@ def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> di
         "payment_method": "BALANCE",
         "timestamp": int(time.time()),
         "points_gained": 0,
-        "can_trigger_rating": False,
+        "can_trigger_rating": can_trigger_rating,
         "akrab_members": [],
         "akrab_parent_alias": "",
         "referral_unique_code": "",
         "coupon": "",
-        "payment_for": "BUY_PACKAGE",
+        "payment_for": payment_for,
         "with_upsell": False,
         "topup_number": "",
         "stage_token": "",
         "authentication_id": "",
         "encrypted_payment_token": build_encrypted_field(urlsafe_b64=True),
         "token": "",
-        "token_confirmation": "",
+        "token_confirmation": token_confirmation,
         "access_token": tokens["access_token"],
         "wallet_number": "",
         "encrypted_authentication_id": build_encrypted_field(urlsafe_b64=True),
-        "additional_data": {},
+        "additional_data": {
+            "original_price": price,
+            "is_spend_limit_temporary": False,
+            "migration_type": "",
+            "akrab_m2m_group_id": "false",
+            "spend_limit_amount": 0,
+            "is_spend_limit": False,
+            "mission_id": "",
+            "tax": 0,
+            "benefit_type": "",
+            "quota_bonus": 0,
+            "cashtag": "",
+            "is_family_plan": False,
+            "combo_details": [],
+            "is_switch_plan": False,
+            "discount_recurring": 0,
+            "is_akrab_m2m": False,
+            "balance_type": "PREPAID_BALANCE",
+            "has_bonus": False,
+            "discount_promo": 0
+            },
         "total_amount": amount_int,
         "is_using_autobuy": False,
         "items": [{
@@ -507,7 +550,7 @@ def purchase_package(api_key: str, tokens: dict, package_option_code: str) -> di
     
     print("Processing purchase...")
     # print(f"settlement payload:\n{json.dumps(settlement_payload, indent=2)}")
-    purchase_result = send_payment_request(api_key, settlement_payload, tokens["access_token"], tokens["id_token"], token_payment, ts_to_sign)
+    purchase_result = send_payment_request(api_key, settlement_payload, tokens["access_token"], tokens["id_token"], token_payment, ts_to_sign, payment_for)
     
     print(f"Purchase result:\n{json.dumps(purchase_result, indent=2)}")
     

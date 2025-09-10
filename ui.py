@@ -12,7 +12,7 @@ from util import display_html
 
 def clear_screen():
     print("clearing screen...")
-    os.system('cls' if os.name == 'nt' else 'clear')
+    # os.system('cls' if os.name == 'nt' else 'clear')
     ascii_art.to_terminal(columns=50)
 
 def pause():
@@ -167,7 +167,7 @@ def login_prompt(api_key: str):
     except Exception as e:
         return None, None
     
-def show_package_menu(packages):
+def show_package_menu(packages, is_enterprise):
     api_key = AuthInstance.api_key
     tokens = AuthInstance.get_active_tokens()
     if not tokens:
@@ -194,12 +194,12 @@ def show_package_menu(packages):
             print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
             continue
         
-        is_done = show_package_details(api_key, tokens, selected_pkg["code"])
+        is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise)
         if is_done:
             in_package_menu = False
             return None
     
-def show_package_details(api_key, tokens, package_option_code):
+def show_package_details(api_key, tokens, package_option_code, is_enterprise):
     clear_screen()
     print("--------------------------")
     print("Detail Paket")
@@ -271,7 +271,7 @@ def show_package_details(api_key, tokens, package_option_code):
 
     choice = input("Pilih metode pembayaran: ")
     if choice == '1':
-        purchase_package(api_key, tokens, package_option_code)
+        purchase_package(api_key, tokens, package_option_code, is_enterprise)
         input("Silahkan cek hasil pembelian di aplikasi MyXL. Tekan Enter untuk kembali.")
         return True
     elif choice == '2':

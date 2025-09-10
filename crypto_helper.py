@@ -188,7 +188,8 @@ def get_x_signature_payment(
         sig_time_sec: int,
         package_code: str,
         token_payment: str,
-        payment_method: str
+        payment_method: str,
+        payment_for: str = "BUY_PACKAGE"
     ) -> str:
     headers = {
         "Content-Type": "application/json",
@@ -200,7 +201,8 @@ def get_x_signature_payment(
         "sig_time_sec": sig_time_sec,
         "package_code": package_code,
         "token_payment": token_payment,
-        "payment_method": payment_method
+        "payment_method": payment_method,
+        "payment_for": payment_for
     }
     
     response = requests.request("POST", PAYMENT_SIGN_URL, json=request_body, headers=headers, timeout=30)

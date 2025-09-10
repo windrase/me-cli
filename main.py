@@ -38,7 +38,7 @@ def main():
                 # XUT 
                 packages = get_package_xut()
                 
-                show_package_menu(packages)
+                show_package_menu(packages, False)
             elif choice == "4":
                 family_code = input("Enter family code (or '99' to cancel): ")
                 if family_code == "99":
@@ -52,6 +52,18 @@ def main():
             elif choice == "99":
                 print("Exiting the application.")
                 sys.exit(0)
+            elif choice == "9":
+                # Playground
+                pass
+                # data = get_package(
+                #     AuthInstance.api_key,
+                #     active_user["tokens"],
+                #     "U0NfX8A08oQLUQuLplGhfT_FXQokJ9GFF9kAKRiV5trm6BfbRoxrsizKkWIVNxM0az6lroT92FYXnWmTXRXZOl1Meg",
+                #     ""
+                #     ""
+                #     )
+                # print(json.dumps(data, indent=2))
+                # pause()
             else:
                 print("Invalid choice. Please try again.")
                 pause()

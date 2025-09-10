@@ -62,7 +62,7 @@ def get_packages_by_family(family_code: str, is_enterprise: bool = False):
             print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
             continue
         
-        is_done = show_package_details(api_key, tokens, selected_pkg["code"])
+        is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise)
         if is_done:
             in_package_menu = False
             return None
