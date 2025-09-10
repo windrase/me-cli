@@ -1,7 +1,7 @@
 import os, json, uuid, requests, time
 from datetime import datetime, timezone, timedelta
 
-from crypto_helper import encryptsign_xdata, java_like_timestamp, ts_gmt7_without_colon, ax_api_signature, decrypt_xdata, API_KEY, get_x_signature_payment, build_encrypted_field, load_ax_fp
+from app.client.crypto import encryptsign_xdata, java_like_timestamp, ts_gmt7_without_colon, ax_api_signature, decrypt_xdata, API_KEY, get_x_signature_payment, build_encrypted_field, load_ax_fp
 
 BASE_API_URL = os.getenv("BASE_API_URL")
 BASE_CIAM_URL = os.getenv("BASE_CIAM_URL")
@@ -329,6 +329,7 @@ def get_package(
     }
     
     print("Fetching package...")
+    # print(f"Payload: {json.dumps(raw_payload, indent=2)}")
     res = send_api_request(api_key, path, raw_payload, tokens["id_token"], "POST")
     
     if "data" not in res:
