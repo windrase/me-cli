@@ -1,7 +1,7 @@
 import os, json, uuid, requests, time
 from datetime import datetime, timezone, timedelta
 
-from app.client.crypto import encryptsign_xdata, java_like_timestamp, ts_gmt7_without_colon, ax_api_signature, decrypt_xdata, API_KEY, get_x_signature_payment, build_encrypted_field, load_ax_fp
+from app.client.encrypt import encryptsign_xdata, java_like_timestamp, ts_gmt7_without_colon, ax_api_signature, decrypt_xdata, API_KEY, get_x_signature_payment, build_encrypted_field, load_ax_fp, ax_device_id
 
 BASE_API_URL = os.getenv("BASE_API_URL")
 BASE_CIAM_URL = os.getenv("BASE_CIAM_URL")
@@ -10,7 +10,8 @@ if not BASE_API_URL or not BASE_CIAM_URL:
 
 GET_OTP_URL = BASE_CIAM_URL + "/realms/xl-ciam/auth/otp"
 BASIC_AUTH = os.getenv("BASIC_AUTH")
-AX_DEVICE_ID = os.getenv("AX_DEVICE_ID")
+# AX_DEVICE_ID = os.getenv("AX_DEVICE_ID")
+AX_DEVICE_ID = ax_device_id()
 AX_FP = load_ax_fp()
 SUBMIT_OTP_URL = BASE_CIAM_URL + "/realms/xl-ciam/protocol/openid-connect/token"
 UA = os.getenv("UA")
