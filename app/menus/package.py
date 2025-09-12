@@ -123,6 +123,7 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise):
             # Add to bookmark
             success = BookmarkInstance.add_bookmark(
                 family_code=package.get("package_family", {}).get("package_family_code",""),
+                family_name=package.get("package_family", {}).get("name",""),
                 is_enterprise=is_enterprise,
                 variant_name=variant_name,
                 option_name=option_name
