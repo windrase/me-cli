@@ -10,7 +10,6 @@ if not BASE_API_URL or not BASE_CIAM_URL:
 
 GET_OTP_URL = BASE_CIAM_URL + "/realms/xl-ciam/auth/otp"
 BASIC_AUTH = os.getenv("BASIC_AUTH")
-# AX_DEVICE_ID = os.getenv("AX_DEVICE_ID")
 AX_DEVICE_ID = ax_device_id()
 AX_FP = load_ax_fp()
 SUBMIT_OTP_URL = BASE_CIAM_URL + "/realms/xl-ciam/protocol/openid-connect/token"
@@ -210,14 +209,20 @@ def send_api_request(
         "x-signature": x_sig,
         "x-request-id": str(uuid.uuid4()),
         "x-request-at": java_like_timestamp(now),
-        "x-version-app": "8.6.0",
+        "x-version-app": "8.7.0",
     }
+    
+    
 
     url = f"{BASE_API_URL}/{path}"
     resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=30)
+    
+    # print(f"Headers: {json.dumps(headers, indent=2)}")
+    # print(f"Response body: {resp.text}")
 
     try:
         decrypted_body = decrypt_xdata(api_key, json.loads(resp.text))
+        # print(f"Decrypted body: {json.dumps(decrypted_body, indent=2)}")
         return decrypted_body
     except Exception as e:
         print("[decrypt err]", e)
@@ -228,7 +233,7 @@ def get_profile(api_key: str, access_token: str, id_token: str) -> dict:
 
     raw_payload = {
         "access_token": access_token,
-        "app_version": "8.6.0",
+        "app_version": "8.7.0",
         "is_enterprise": False,
         "lang": "en"
     }
@@ -406,7 +411,7 @@ def send_payment_request(
         "x-signature": x_sig,
         "x-request-id": str(uuid.uuid4()),
         "x-request-at": java_like_timestamp(x_requested_at),
-        "x-version-app": "8.6.0",
+        "x-version-app": "8.7.0",
     }
     
     url = f"{BASE_API_URL}/{path}"
