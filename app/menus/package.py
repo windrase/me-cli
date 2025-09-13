@@ -7,39 +7,39 @@ from app.service.bookmark import BookmarkInstance
 from app.client.purchase import show_multipayment, show_qris_payment, settlement_bounty
 from app.menus.util import clear_screen, pause, display_html
 
-def show_package_menu(packages, is_enterprise):
-    api_key = AuthInstance.api_key
-    tokens = AuthInstance.get_active_tokens()
-    if not tokens:
-        print("No active user tokens found.")
-        pause()
-        return None
+# def show_package_menu(packages, is_enterprise):
+#     api_key = AuthInstance.api_key
+#     tokens = AuthInstance.get_active_tokens()
+#     if not tokens:
+#         print("No active user tokens found.")
+#         pause()
+#         return None
     
-    in_package_menu = True
-    while in_package_menu:
-        clear_screen()
-        print("--------------------------")
-        print("Paket Tersedia")
-        print("--------------------------")
-        for pkg in packages:
-            print(f"{pkg['number']}. {pkg['name']} - Rp {pkg['price']}")
-        print("99. Kembali ke menu utama")
-        print("--------------------------")
-        pkg_choice = input("Pilih paket (nomor): ")
-        if pkg_choice == "99":
-            in_package_menu = False
-            return None
-        selected_pkg = next((p for p in packages if p["number"] == int(pkg_choice)), None)
-        if not selected_pkg:
-            print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
-            continue
+#     in_package_menu = True
+#     while in_package_menu:
+#         clear_screen()
+#         print("--------------------------")
+#         print("Paket Tersedia")
+#         print("--------------------------")
+#         for pkg in packages:
+#             print(f"{pkg['number']}. {pkg['name']} - Rp {pkg['price']} order {pkg['option_order']}")
+#         print("99. Kembali ke menu utama")
+#         print("--------------------------")
+#         pkg_choice = input("Pilih paket (nomor): ")
+#         if pkg_choice == "99":
+#             in_package_menu = False
+#             return None
+#         selected_pkg = next((p for p in packages if p["number"] == int(pkg_choice)), None)
+#         if not selected_pkg:
+#             print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
+#             continue
         
-        is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise)
-        if is_done:
-            in_package_menu = False
-            return None
+#         is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise, selected_pkg["option_order"])
+#         if is_done:
+#             in_package_menu = False
+#             return None
     
-def show_package_details(api_key, tokens, package_option_code, is_enterprise):
+def show_package_details(api_key, tokens, package_option_code, is_enterprise, option_order = -1):
     clear_screen()
     print("--------------------------")
     print("Detail Paket")
@@ -112,21 +112,23 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise):
         
         if payment_for == "REDEEM_VOUCHER":
             print("4. Ambil sebagai bonus (jika tersedia)")
-            
-        print("0. Tambah ke Bookmark")
+        
+        if option_order != -1:
+            print("0. Tambah ke Bookmark")
         print("00. Kembali ke daftar paket")
 
         choice = input("Pilihan: ")
         if choice == "00":
             return False
-        if choice == "0":
+        if choice == "0" and option_order != -1:
             # Add to bookmark
             success = BookmarkInstance.add_bookmark(
                 family_code=package.get("package_family", {}).get("package_family_code",""),
                 family_name=package.get("package_family", {}).get("name",""),
                 is_enterprise=is_enterprise,
                 variant_name=variant_name,
-                option_name=option_name
+                option_name=option_name,
+                order=option_order,
             )
             if success:
                 print("Paket berhasil ditambahkan ke bookmark.")
@@ -204,8 +206,11 @@ def get_packages_by_family(family_code: str, is_enterprise: bool = False):
                     "variant_name": variant_name,
                     "option_name": option_name,
                     "price": option["price"],
-                    "code": option["package_option_code"]
+                    "code": option["package_option_code"],
+                    "option_order": option["order"]
                 })
+                
+                # print(json.dumps(option, indent=2))
                 
                 print(f"{option_number}. {option_name} - Rp {option['price']}")
                 
@@ -223,7 +228,7 @@ def get_packages_by_family(family_code: str, is_enterprise: bool = False):
             print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
             continue
         
-        is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise)
+        is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise, option_order=selected_pkg["option_order"])
         if is_done:
             in_package_menu = False
             return None
