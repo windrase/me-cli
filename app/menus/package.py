@@ -12,9 +12,9 @@ from app.type_dict import PaymentItem
 
 def show_package_details(api_key, tokens, package_option_code, is_enterprise, option_order = -1):
     clear_screen()
-    print("--------------------------")
+    print("-------------------------------------------------------")
     print("Detail Paket")
-    print("--------------------------")
+    print("-------------------------------------------------------")
     package = get_package(api_key, tokens, package_option_code)
     # print(f"[SPD-202]:\n{json.dumps(package, indent=1)}")
     if not package:
@@ -39,16 +39,16 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
     ts_to_sign = package["timestamp"]
     payment_for = package["package_family"]["payment_for"]
     
-    print("--------------------------")
+    print("-------------------------------------------------------")
     print(f"Nama: {title}")
     print(f"Harga: Rp {price}")
     print(f"Masa Aktif: {validity}")
-    print("--------------------------")
+    print("-------------------------------------------------------")
     benefits = package["package_option"]["benefits"]
     if benefits and isinstance(benefits, list):
         print("Benefits:")
         for benefit in benefits:
-            print("--------------------------")
+            print("-------------------------------------------------------")
             print(f" Name: {benefit['name']}")
             if "Call" in benefit['name']:
                 print(f"  Total: {benefit['total']/60} menit")
@@ -67,12 +67,12 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
                         print(f"  Quota: {quota_kb:.2f} KB")
                     else:
                         print(f"  Total: {quota}")
-    print("--------------------------")
+    print("-------------------------------------------------------")
     # addons = get_addons(api_key, tokens, package_option_code)
     # print(f"Addons:\n{json.dumps(addons, indent=2)}")
-    print("--------------------------")
+    print("-------------------------------------------------------")
     print(f"SnK MyXL:\n{detail}")
-    print("--------------------------")
+    print("-------------------------------------------------------")
     
     in_package_detail_menu = True
     while in_package_detail_menu:
@@ -178,9 +178,9 @@ def get_packages_by_family(family_code: str, is_enterprise: bool = False):
     in_package_menu = True
     while in_package_menu:
         clear_screen()
-        print("--------------------------")
+        print("-------------------------------------------------------")
         print("Paket Tersedia")
-        print("--------------------------")
+        print("-------------------------------------------------------")
         
         family_name = data['package_family']["name"]
         print(f"Family Name: {family_name}")
@@ -261,9 +261,9 @@ def fetch_my_packages():
     quotas = res["data"]["quotas"]
     
     clear_screen()
-    print("===============================")
-    print("My Packages")
-    print("===============================")
+    print("=======================================================")
+    print("======================My Packages======================")
+    print("=======================================================")
     my_packages =[]
     num = 1
     for quota in quotas:
@@ -277,13 +277,13 @@ def fetch_my_packages():
         if package_details:
             family_code = package_details["package_family"]["package_family_code"]
         
-        print("===============================")
+        print("=======================================================")
         print(f"Package {num}")
         print(f"Name: {name}")
         print(f"Quota Code: {quota_code}")
         print(f"Family Code: {family_code}")
         print(f"Group Code: {group_code}")
-        print("===============================")
+        print("=======================================================")
         
         my_packages.append({
             "number": num,
