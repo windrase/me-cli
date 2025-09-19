@@ -608,3 +608,39 @@ def login_info(
         
     return res["data"]
 
+def get_package_details(
+    api_key: str,
+    tokens: dict,
+    family_code: str,
+    variant_name: str,
+    option_order: int,
+    is_enterprise: bool,
+) -> dict | None:
+    family_data = get_family(api_key, tokens, family_code, is_enterprise)
+    if not family_data:
+        print(f"Gagal mengambil data family untuk {family_code}.")
+        return None
+    
+    package_variants = family_data["package_variants"]
+    option_code = None
+    for variant in package_variants:
+        if variant["name"] == variant_name:
+            selected_variant = variant
+            
+            package_options = selected_variant["package_options"]
+            for option in package_options:
+                if option["order"] == option_order:
+                    selected_option = option
+                    option_code = selected_option["package_option_code"]
+                    break
+
+    if option_code is None:
+        print("Gagal menemukan opsi paket yang sesuai.")
+        return None
+        
+    package_details_data = get_package(api_key, tokens, option_code)
+    if not package_details_data:
+        print("Gagal mengambil detail paket.")
+        return None
+    
+    return package_details_data

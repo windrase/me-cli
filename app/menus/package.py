@@ -1,44 +1,15 @@
 import sys
-import json
-
 from app.service.auth import AuthInstance
 from app.client.engsel import get_family, get_package, get_addons, purchase_package, send_api_request
 from app.service.bookmark import BookmarkInstance
-from app.client.purchase import show_multipayment, show_qris_payment, settlement_bounty
+from app.client.purchase import show_qris_payment, settlement_bounty
+from app.client.ewallet import show_multipayment
 from app.menus.util import clear_screen, pause, display_html
+from app.client.qris import show_qris_payment_v2
+from app.client.ewallet import show_multipayment_v2
+from app.type_dict import PaymentItem
 
-# def show_package_menu(packages, is_enterprise):
-#     api_key = AuthInstance.api_key
-#     tokens = AuthInstance.get_active_tokens()
-#     if not tokens:
-#         print("No active user tokens found.")
-#         pause()
-#         return None
-    
-#     in_package_menu = True
-#     while in_package_menu:
-#         clear_screen()
-#         print("--------------------------")
-#         print("Paket Tersedia")
-#         print("--------------------------")
-#         for pkg in packages:
-#             print(f"{pkg['number']}. {pkg['name']} - Rp {pkg['price']} order {pkg['option_order']}")
-#         print("99. Kembali ke menu utama")
-#         print("--------------------------")
-#         pkg_choice = input("Pilih paket (nomor): ")
-#         if pkg_choice == "99":
-#             in_package_menu = False
-#             return None
-#         selected_pkg = next((p for p in packages if p["number"] == int(pkg_choice)), None)
-#         if not selected_pkg:
-#             print("Paket tidak ditemukan. Silakan masukan nomor yang benar.")
-#             continue
-        
-#         is_done = show_package_details(api_key, tokens, selected_pkg["code"], is_enterprise, selected_pkg["option_order"])
-#         if is_done:
-#             in_package_menu = False
-#             return None
-    
+
 def show_package_details(api_key, tokens, package_option_code, is_enterprise, option_order = -1):
     clear_screen()
     print("--------------------------")
@@ -97,8 +68,8 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
                     else:
                         print(f"  Total: {quota}")
     print("--------------------------")
-    addons = get_addons(api_key, tokens, package_option_code)
-    print(f"Addons:\n{json.dumps(addons, indent=2)}")
+    # addons = get_addons(api_key, tokens, package_option_code)
+    # print(f"Addons:\n{json.dumps(addons, indent=2)}")
     print("--------------------------")
     print(f"SnK MyXL:\n{detail}")
     print("--------------------------")
@@ -142,11 +113,35 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
             input("Silahkan cek hasil pembelian di aplikasi MyXL. Tekan Enter untuk kembali.")
             return True
         elif choice == '2':
-            show_multipayment(api_key, tokens, package_option_code, token_confirmation, price, item_name)
+            # show_multipayment(api_key, tokens, package_option_code, token_confirmation, price, item_name)
+            show_multipayment_v2(
+                api_key,
+                tokens,
+                [PaymentItem(
+                    item_code=package_option_code,
+                    product_type="",
+                    item_price=price,
+                    item_name=option_name,
+                    tax=0,
+                    token_confirmation=token_confirmation,
+                )]
+            )
             input("Silahkan lakukan pembayaran & cek hasil pembelian di aplikasi MyXL. Tekan Enter untuk kembali.")
             return True
         elif choice == '3':
-            show_qris_payment(api_key, tokens, package_option_code, token_confirmation, price, item_name)
+            # show_qris_payment(api_key, tokens, package_option_code, token_confirmation, price, item_name)
+            show_qris_payment_v2(
+                api_key,
+                tokens,
+                [PaymentItem(
+                    item_code=package_option_code,
+                    product_type="",
+                    item_price=price,
+                    item_name=option_name,
+                    tax=0,
+                    token_confirmation=token_confirmation,
+                )]
+            )
             input("Silahkan lakukan pembayaran & cek hasil pembelian di aplikasi MyXL. Tekan Enter untuk kembali.")
             return True
         elif choice == '4':
