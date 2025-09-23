@@ -621,18 +621,28 @@ def get_package_details(
         print(f"Gagal mengambil data family untuk {family_code}.")
         return None
     
+    package_options = []
+    
     package_variants = family_data["package_variants"]
     option_code = None
     for variant in package_variants:
-        if variant["name"] == variant_name:
-            selected_variant = variant
+
+        # if clean_text(variant["name"]) == variant_name:
+        #     selected_variant = variant
             
-            package_options = selected_variant["package_options"]
-            for option in package_options:
-                if option["order"] == option_order:
-                    selected_option = option
-                    option_code = selected_option["package_option_code"]
-                    break
+        #     package_options = selected_variant["package_options"]
+        #     for option in package_options:
+        #         if option["order"] == option_order:
+        #             selected_option = option
+        #             option_code = selected_option["package_option_code"]
+        #             break
+        package_options.extend(variant["package_options"])
+    
+    for option in package_options:
+        if option["order"] == option_order:
+            selected_option = option
+            option_code = selected_option["package_option_code"]
+            break
 
     if option_code is None:
         print("Gagal menemukan opsi paket yang sesuai.")
