@@ -160,7 +160,11 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
     pause()
     sys.exit(0)
 
-def get_packages_by_family(family_code: str, is_enterprise: bool = False):
+def get_packages_by_family(
+    family_code: str,
+    is_enterprise: bool = False,
+    migration_type: str = "NONE"
+):
     api_key = AuthInstance.api_key
     tokens = AuthInstance.get_active_tokens()
     if not tokens:
@@ -170,7 +174,7 @@ def get_packages_by_family(family_code: str, is_enterprise: bool = False):
     
     packages = []
     
-    data = get_family(api_key, tokens, family_code, is_enterprise)
+    data = get_family(api_key, tokens, family_code, is_enterprise, migration_type)
     if not data:
         print("Failed to load family data.")
         return None    

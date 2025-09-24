@@ -261,7 +261,13 @@ def get_balance(api_key: str, id_token: str) -> dict:
         print("Error getting balance:", res.get("error", "Unknown error"))
         return None
     
-def get_family(api_key: str, tokens: dict, family_code: str, is_enterprise: bool = False) -> dict:
+def get_family(
+    api_key: str,
+    tokens: dict,
+    family_code: str,
+    is_enterprise: bool = False,
+    migration_type: str = "NONE"
+) -> dict:
     print("Fetching package family...")
     path = "api/v8/xl-stores/options/list"
     id_token = tokens.get("id_token")
@@ -269,7 +275,7 @@ def get_family(api_key: str, tokens: dict, family_code: str, is_enterprise: bool
         "is_show_tagging_tab": True,
         "is_dedicated_event": True,
         "is_transaction_routine": False,
-        "migration_type": "NONE",
+        "migration_type": migration_type,
         "package_family_code": family_code,
         "is_autobuy": False,
         "is_enterprise": is_enterprise,
@@ -615,8 +621,9 @@ def get_package_details(
     variant_name: str,
     option_order: int,
     is_enterprise: bool,
+    migration_type: str = "NONE"
 ) -> dict | None:
-    family_data = get_family(api_key, tokens, family_code, is_enterprise)
+    family_data = get_family(api_key, tokens, family_code, is_enterprise, migration_type)
     if not family_data:
         print(f"Gagal mengambil data family untuk {family_code}.")
         return None
